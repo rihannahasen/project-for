@@ -1,0 +1,100 @@
+```<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Last.fm Music Cards</title>
+  <!-- Include Bootstrap CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    .music-card {
+      border: 1px solid #ccc;
+      padding: 10px;
+      margin: 10px;
+      width: 200px;
+      cursor: pointer;
+      position: relative;
+    }
+    .music-card img {
+      max-width: 100%;
+      height: auto;
+    }
+    .info-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      background: rgba(255, 255, 255, 0.8);
+      width: 100%;
+      height: 100%;
+      display: none;
+      align-items: center;
+      justify-content: center;
+    }
+    .music-card:hover .info-overlay {
+      display: flex;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="row">
+      <div class="col-md-6" id="artist-info-container">
+        <!-- Artist information will be displayed here -->
+      </div>
+      <div class="col-md-6">
+        <div class="row" id="music-container"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Include Bootstrap JS and jQuery -->
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    const lastFMAPIKey = '64e3feea0800a4d384ecc14b52ee2bf0';
+    const musicContainer = document.getElementById('music-container');
+    const artistInfoContainer = document.getElementById('artist-info-container');
+
+    // Fetch data from Last.fm API
+    fetch(`https://ws.audioscrobbler.com/2.0/?method=chart.gettoptracks&api_key=${lastFMAPIKey}&format=json`)
+      .then(response => response.json())
+      .then(data => {
+        const tracks = data.tracks.track;
+        const html = tracks.map(track => createMusicCard(track)).join('');
+        musicContainer.innerHTML = html;
+      })
+      .catch(error => {
+        musicContainer.textContent = 'Error fetching data'; // Provide user-friendly error message
+        console.error('Error fetching data:', error);
+      });
+
+    function createMusicCard(track) {
+      return `
+        <div class="col-md-4">
+          <div class="music-card" onclick="showArtistInfo('${track.artist.name}', '${track.image[2]['#text']}', '${track.genre}', '${track.date}')">
+            <img src="${track.image[2]['#text']}" alt="Track Image">
+            <div class="info-overlay">
+              <p>${track.artist.name}<br>${track.date}<br>${track.name}<br>${track.genre}</p>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    function showArtistInfo(artistName, imageSrc, genre, date) {
+      const html = `
+        <div class="card">
+          <img src="${imageSrc}" class="card-img-top" alt="Artist Image">
+          <div class="card-body">
+            <h5 class="card-title">${artistName}</h5>
+            <p class="card-text">Genre: ${genre}</p>
+            <p class="card-text">Date Released: ${date}</p>
+            <!-- Add artist description here -->
+          </div>
+        </div>
+      `;
+      artistInfoContainer.innerHTML = html;
+    }
+  </script>
+</body>
+</html>```
